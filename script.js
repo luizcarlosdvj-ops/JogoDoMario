@@ -220,31 +220,55 @@ document.addEventListener('keydown', (e) => {
 });
 document.addEventListener('keyup', (e) => { if (e.key === 'ArrowDown') crouch(false); });
 
-// Lógica de Toque Contínuo (Mobile)
-let moveInterval;
+// Lógica de Toque Contínuo e Clique (Mobile & Desktop)
+let moveInterval = null;
+
 const setupMobileButton = (id, actionStart, actionEnd = null) => {
     const btn = document.getElementById(id);
     if (!btn) return;
-    btn.addEventListener('touchstart', (e) => {
+
+    // Função para iniciar a ação
+    const handleStart = (e) => {
         e.preventDefault();
         if (id === 'btn-left' || id === 'btn-right') {
-            const dir = id === 'btn-left' ? -1 : 1;
-            moveInterval = setInterval(() => move(dir), 50);
-        } else {
-            actionStart();
+            const dir = (id === 'btn-left') ? -1 : 1;
+            if (moveInterval) clearInterval(moveInterval);
+            move(dir); // Move uma vez imediato
+            moveInterval = setInterval(() => move(dir), 50); // Continua movendo
+        } else if (id === 'btn-jump') {
+            jump();
+        } else if (id === 'btn-shoot') {
+            marioShoot();
+        } else if (id === 'btn-down') {
+            crouch(true);
         }
-    });
-    btn.addEventListener('touchend', (e) => {
+    };
+
+    // Função para parar a ação
+    const handleEnd = (e) => {
         e.preventDefault();
-        if (moveInterval) clearInterval(moveInterval);
-        if (actionEnd) actionEnd();
-    });
+        if (id === 'btn-left' || id === 'btn-right') {
+            clearInterval(moveInterval);
+            moveInterval = null;
+        } else if (id === 'btn-down') {
+            crouch(false);
+        }
+    };
+
+    // Eventos de Pointer (abrange Toque e Mouse)
+    btn.addEventListener('pointerdown', handleStart);
+    btn.addEventListener('pointerup', handleEnd);
+    btn.addEventListener('pointerleave', handleEnd); // Para se o dedo sair do botão
 };
 
-setupMobileButton('btn-left', null);
-setupMobileButton('btn-right', null);
-setupMobileButton('btn-jump', () => jump());
-setupMobileButton('btn-shoot', () => marioShoot());
-setupMobileButton('btn-down', () => crouch(true), () => crouch(false));
+// Inicializa todos os botões
+setupMobileButton('btn-left');
+setupMobileButton('btn-right');
+setupMobileButton('btn-jump');
+setupMobileButton('btn-shoot');
+setupMobileButton('btn-down');
 
-applyPhysics();
+// Prevenir zoom de duplo toque no celular
+document.addEventListener('touchstart', (e) => {
+    if (e.touches.length > 1) e.preventDefault();
+}, { passive: false });
