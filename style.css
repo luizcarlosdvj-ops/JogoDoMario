@@ -1,15 +1,15 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body, html { 
-    height: 100%; width: 100%; 
+    height: 100dvh; width: 100vw; 
     overflow: hidden; background-color: #000; 
-    font-family: 'Arial', sans-serif; touch-action: none;
+    font-family: Arial, sans-serif; touch-action: none;
 }
 
 #orientation-warning {
     display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: #111; color: white; z-index: 9999; text-align: center; padding-top: 20vh;
+    background: #111; color: white; z-index: 9999; text-align: center; padding-top: 15dvh;
 }
-.phone-icon { font-size: 50px; margin-top: 20px; animation: rotate 2s infinite; }
+.phone-icon { font-size: 40px; margin-top: 10px; animation: rotate 2s infinite; }
 @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(90deg); } }
 
 @media (orientation: portrait) and (max-width: 900px) {
@@ -18,77 +18,70 @@ body, html {
 }
 
 .game-board {
-    width: 100vw; height: 100vh;
-    border-bottom: 4vh solid #2ecc71; /* Chão proporcional à altura */
+    width: 100vw; height: 100dvh;
+    border-bottom: 5dvh solid #2ecc71; /* Chão garantido na base */
     position: relative; overflow: hidden; 
     background: linear-gradient(#87CEEB, #E0F6FF);
 }
 
 .info-panel {
-    position: absolute; top: 2vh; left: 5vw; right: 5vw;
+    position: absolute; top: 1dvh; left: 2vw; right: 2vw;
     display: flex; justify-content: space-between; z-index: 20;
-    font-size: 18px; font-weight: bold; color: #333;
+    font-size: 16px; color: #333;
 }
 
 .mario { 
-    width: 12vh; height: 12vh; /* Tamanho baseado na altura da tela */
-    position: absolute; bottom: 0; left: 10vw;
-    z-index: 10;
+    width: auto; height: 14dvh; /* Mario escalável pela altura */
+    position: absolute; bottom: 0; left: 10vw; z-index: 10;
 }
-.mario.face-left { transform: scaleX(-1); }
-.mario.crouch { height: 6vh !important; }
+.mario.crouch { height: 7dvh !important; }
 
-.pipe { position: absolute; bottom: 0; width: 10vh; height: 25vh; right: -20vh; }
-
+.pipe { position: absolute; bottom: 0; width: auto; height: 20dvh; right: -20vw; }
 .pipe-ceiling { 
-    position: absolute; top: 0; width: 10vh; 
-    height: 35vh; /* Altura fixa para PC/Padrão */
-    right: -20vh; transform: rotate(180deg); 
+    position: absolute; top: 0; width: auto; height: 30dvh; 
+    right: -20vw; transform: rotate(180deg); 
 }
 
 .pipe-animation { animation: pipe-move 2s infinite linear; }
-@keyframes pipe-move { from { right: -20vh; } to { right: 110%; } }
+@keyframes pipe-move { from { right: -20vw; } to { right: 110%; } }
 
-.clouds { position: absolute; width: 30vh; top: 10vh; animation: clouds-move 25s infinite linear; }
-@keyframes clouds-move { from { right: -40vh; } to { right: 110%; } }
+.clouds { position: absolute; width: 25dvh; top: 5dvh; animation: clouds-move 20s infinite linear; }
+@keyframes clouds-move { from { right: -30vw; } to { right: 110%; } }
 
-.boss { position: absolute; right: 5vw; bottom: 0; width: 25vh; height: 35vh; }
+.boss { position: absolute; right: 5vw; bottom: 0; height: 40dvh; width: auto; }
 #boss-health-bar { 
-    position: absolute; top: 15vh; left: 50%; transform: translateX(-50%);
-    width: 40vw; height: 3vh; background: #555; display: none; border: 2px solid #000;
+    position: absolute; top: 10dvh; left: 50%; transform: translateX(-50%);
+    width: 50vw; height: 3dvh; background: #555; display: none; border: 2px solid #000;
 }
 #health-fill { width: 100%; height: 100%; background: red; }
 
 .mario-bullet, .boss-bullet {
-    position: absolute; width: 5vh; height: 5vh;
+    position: absolute; width: 4dvh; height: 4dvh;
     background-image: url('bola.png'); background-size: cover;
 }
 
 .game-over-screen {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    display: none; background: rgba(0,0,0,0.8); color: white;
-    padding: 5vh; text-align: center; z-index: 100; border-radius: 15px;
+    display: none; background: rgba(0,0,0,0.9); color: white;
+    padding: 20px; text-align: center; z-index: 100; border-radius: 10px; width: 80%;
 }
 
-/* CONTROLES MOBILE - Ajustados para não tampar o jogo */
 .mobile-controls {
-    display: none; position: fixed; bottom: 2vh; width: 100%;
-    justify-content: space-between; padding: 0 5vw; z-index: 1000;
+    display: none; position: fixed; bottom: 2dvh; width: 100%;
+    justify-content: space-between; padding: 0 3vw; z-index: 1000;
     pointer-events: none;
 }
 
 @media (max-width: 900px) {
     .mobile-controls { display: flex; }
-    /* No celular deitado, o cano do teto desce mais para obrigar o agachar */
-    .pipe-ceiling { height: 85vh; } 
+    .pipe-ceiling { height: 55dvh; } /* Ajuste de dificuldade no mobile */
 }
 
-.d-pad, .action-buttons { pointer-events: auto; }
-.d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
-.action-buttons { display: flex; gap: 10px; }
+.d-pad, .action-buttons { pointer-events: auto; display: flex; gap: 8px; }
+.d-pad { display: grid; grid-template-columns: repeat(3, 1fr); }
 
 .mobile-controls button {
-    width: 12vh; height: 12vh; 
-    background: rgba(0, 0, 0, 0.3); border: 2px solid rgba(255,255,255,0.5); 
-    border-radius: 50%; color: white; font-size: 10px;
+    width: 11dvh; height: 11dvh; 
+    background: rgba(0, 0, 0, 0.5); border: 1px solid #fff; 
+    border-radius: 50%; color: white; font-size: 12px;
 }
