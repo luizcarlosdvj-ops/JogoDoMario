@@ -18,11 +18,11 @@ let bossHealth = 100;
 let canMarioShoot = true;
 let isCrouching = false;
 
-// Física
-let marioPosX = 100;
+// Física adaptativa (usa a altura da tela como base)
+let marioPosX = window.innerWidth * 0.1;
 let marioPosY = 0;
 let marioVelY = 0;
-let gravity = 0.8;
+let gravity = window.innerHeight * 0.0015; // Gravidade baseada na altura
 let onPlatform = true;
 let marioDirection = 1;
 
@@ -47,17 +47,17 @@ function applyPhysics() {
 const move = (dir) => {
     if (!isAlive) return;
     marioDirection = dir;
-    let moveAmount = 15;
+    let moveAmount = window.innerWidth * 0.02; // Movimento proporcional
     marioPosX += dir * moveAmount;
 
     if (marioPosX < 0) marioPosX = 0;
-    if (marioPosX > board.offsetWidth - 60) marioPosX = board.offsetWidth - 60;
+    if (marioPosX > board.offsetWidth - mario.offsetWidth) marioPosX = board.offsetWidth - mario.offsetWidth;
     dir === -1 ? mario.classList.add('face-left') : mario.classList.remove('face-left');
 };
 
 const jump = () => {
     if (isAlive && onPlatform && !isCrouching) {
-        marioVelY = 18;
+        marioVelY = window.innerHeight * 0.035; // Pulo proporcional
         onPlatform = false;
     }
 };
@@ -75,14 +75,14 @@ function marioShoot() {
 
     const bullet = document.createElement('div');
     bullet.classList.add('mario-bullet');
-    bullet.style.bottom = (marioPosY + 30) + 'px';
-    bullet.style.left = (marioPosX + (marioDirection === 1 ? 50 : -5)) + 'px';
+    bullet.style.bottom = (marioPosY + (mario.offsetHeight/2)) + 'px';
+    bullet.style.left = (marioPosX + (marioDirection === 1 ? mario.offsetWidth : -10)) + 'px';
     bulletsContainer.appendChild(bullet);
 
     const shotDir = marioDirection;
     const moveBullet = setInterval(() => {
         let bLeft = parseInt(bullet.style.left);
-        bullet.style.left = (bLeft + (shotDir * 12)) + 'px';
+        bullet.style.left = (bLeft + (shotDir * 15)) + 'px';
         const bRect = bullet.getBoundingClientRect();
 
         if (isBossFight) {
@@ -100,41 +100,39 @@ function marioShoot() {
     }, 10);
 }
 
-// Loop de Colisão
-const collisionLoop = setInterval(() => {
+// Colisão
+setInterval(() => {
     if (!isAlive || isBossFight) return;
     const mRect = mario.getBoundingClientRect();
     const gRect = pipeGround.getBoundingClientRect();
     const cRect = pipeCeiling.getBoundingClientRect();
 
     if (pipeGround.classList.contains('pipe-animation')) {
-        if (mRect.right > gRect.left + 15 && mRect.left < gRect.right - 15 && mRect.bottom > gRect.top + 10) {
+        if (mRect.right > gRect.left + 20 && mRect.left < gRect.right - 20 && mRect.bottom > gRect.top + 10) {
             finishGame("Bateu no cano de baixo!");
         }
     }
-
     if (pipeCeiling.classList.contains('pipe-animation')) {
-        if (mRect.right > cRect.left + 15 && mRect.left < cRect.right - 15) {
-            if (!isCrouching && mRect.top < cRect.bottom - 5) {
+        if (mRect.right > cRect.left + 20 && mRect.left < cRect.right - 20) {
+            if (!isCrouching && mRect.top < cRect.bottom - 10) {
                 finishGame("Cano no teto! Tinha que agachar!");
             }
         }
     }
-
     score++;
     scoreElement.innerHTML = `Pontos: ${Math.floor(score / 10)}`;
     if (Math.floor(score / 10) === 400 && !isBossFight) startBossFight();
 }, 10);
 
-// Alternador de Canos (Corrida Infinita)
-const pipeInterval = setInterval(() => {
+// Loop dos canos
+setInterval(() => {
     if (!isBossFight && isAlive) {
         pipeGround.classList.remove('pipe-animation');
         pipeCeiling.classList.remove('pipe-animation');
         void pipeGround.offsetWidth; 
         Math.random() > 0.5 ? pipeGround.classList.add('pipe-animation') : pipeCeiling.classList.add('pipe-animation');
     }
-}, 1800);
+}, 2200);
 
 function startBossFight() {
     isBossFight = true;
@@ -143,26 +141,25 @@ function startBossFight() {
     const bossAttack = setInterval(() => { 
         if (isBossFight && isAlive) spawnBossAttack(); 
         else clearInterval(bossAttack);
-    }, 1200);
+    }, 1500);
 }
 
 function endBossFight() {
     isBossFight = false;
     boss.style.display = 'none'; healthBar.style.display = 'none';
     pipeGround.style.display = 'block'; pipeCeiling.style.display = 'block';
-    alert("BOSS DERROTADO! A corrida continua...");
-    bossHealth = 100; // Reseta para caso queira invocar de novo no futuro
+    bossHealth = 100;
 }
 
 function spawnBossAttack() {
     const bullet = document.createElement('div');
     bullet.classList.add('boss-bullet');
     bullet.style.bottom = (marioPosY + 20) + 'px';
-    bullet.style.right = '100px'; 
+    bullet.style.right = '50px'; 
     bulletsContainer.appendChild(bullet);
     const moveB = setInterval(() => {
         let bRight = parseInt(bullet.style.right) || 0;
-        bullet.style.right = (bRight + 10) + 'px';
+        bullet.style.right = (bRight + 12) + 'px';
         const bRect = bullet.getBoundingClientRect();
         const mRect = mario.getBoundingClientRect();
         if (bRect.left < mRect.right && bRect.right > mRect.left && bRect.top < mRect.bottom && bRect.bottom > mRect.top) {
@@ -187,7 +184,7 @@ function finishGame(r) {
 
 function restartGame() { location.reload(); }
 
-// Controles Teclado & Mobile
+// Controles Híbridos
 document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowUp') jump();
     if (e.key === 'ArrowLeft') move(-1);
