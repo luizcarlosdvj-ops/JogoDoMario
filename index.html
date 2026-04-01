@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mario Game - Boss Edition</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -16,13 +16,6 @@
         <img src="clouds.png" class="clouds">
         <img src="pipe.png" class="pipe" id="pipeGround">
         <img src="pipe.png" class="pipe-ceiling" id="pipeCeiling">
-        
-        <div id="platforms-container" style="display: none;">
-            <div class="platform" style="left: 20%; bottom: 180px;"></div>
-            <div class="platform" style="left: 60%; bottom: 280px;"></div>
-        </div>
-
-        <div id="enemies-container"></div>
 
         <img src="pipe.png" class="boss" id="boss" style="display: none;">
         <div id="boss-health-bar">
@@ -38,6 +31,19 @@
             <button onclick="restartGame()">RESTART</button>
         </div>
     </div>
+
+    <div class="mobile-controls">
+        <div class="d-pad">
+            <button id="btn-left">◀</button>
+            <button id="btn-down">▼</button>
+            <button id="btn-right">▶</button>
+        </div>
+        <div class="action-buttons">
+            <button id="btn-shoot">ATIRAR</button>
+            <button id="btn-jump">PULAR</button>
+        </div>
+    </div>
+
     <script src="script.js" defer></script>
 </body>
 </html>
