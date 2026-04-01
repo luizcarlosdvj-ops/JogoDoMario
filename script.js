@@ -7,7 +7,6 @@ const boss = document.getElementById('boss');
 const healthBar = document.getElementById('boss-health-bar');
 const healthFill = document.getElementById('health-fill');
 const bulletsContainer = document.getElementById('bullets-container');
-const enemiesContainer = document.getElementById('enemies-container');
 const gameOverScreen = document.getElementById('gameOverScreen');
 const board = document.querySelector('.game-board');
 
@@ -15,7 +14,6 @@ let score = 0;
 let marioLives = 3;
 let isAlive = true;
 let isBossFight = false;
-let isMiniPipePhase = false;
 let bossHealth = 100;
 let canMarioShoot = true;
 let isCrouching = false;
@@ -50,13 +48,7 @@ const move = (dir) => {
     if (!isAlive) return;
     marioDirection = dir;
     let moveAmount = 15;
-
-    if (!isBossFight && !isMiniPipePhase) {
-        if (dir === 1) marioPosX += moveAmount;
-        if (dir === -1 && marioPosX > 100) marioPosX -= moveAmount;
-    } else {
-        marioPosX += dir * moveAmount;
-    }
+    marioPosX += dir * moveAmount;
 
     if (marioPosX < 0) marioPosX = 0;
     if (marioPosX > board.offsetWidth - 60) marioPosX = board.offsetWidth - 60;
@@ -77,7 +69,7 @@ const crouch = (state) => {
 };
 
 function marioShoot() {
-    if (!isAlive || !canMarioShoot || (!isBossFight && !isMiniPipePhase)) return;
+    if (!isAlive || !canMarioShoot) return;
     canMarioShoot = false;
     setTimeout(() => canMarioShoot = true, 400);
 
@@ -90,25 +82,16 @@ function marioShoot() {
     const shotDir = marioDirection;
     const moveBullet = setInterval(() => {
         let bLeft = parseInt(bullet.style.left);
-        bullet.style.left = (bLeft + (shotDir * 10)) + 'px';
+        bullet.style.left = (bLeft + (shotDir * 12)) + 'px';
         const bRect = bullet.getBoundingClientRect();
-
-        document.querySelectorAll('.mini-pipe').forEach(mini => {
-            const minRect = mini.getBoundingClientRect();
-            if (bRect.right > minRect.left && bRect.left < minRect.right &&
-                bRect.top < minRect.bottom && bRect.bottom > minRect.top) {
-                mini.remove(); bullet.remove(); score += 500; clearInterval(moveBullet);
-            }
-        });
 
         if (isBossFight) {
             const bossRect = boss.getBoundingClientRect();
-            if (bRect.right > bossRect.left && bRect.left < bossRect.right &&
-                bRect.top < bossRect.bottom && bRect.bottom > bossRect.top) {
+            if (bRect.right > bossRect.left && bRect.left < bossRect.right && bRect.top < bossRect.bottom && bRect.bottom > bossRect.top) {
                 bossHealth -= 5;
                 healthFill.style.width = bossHealth + '%';
                 bullet.remove(); clearInterval(moveBullet);
-                if (bossHealth <= 0) startMiniPipePhase();
+                if (bossHealth <= 0) endBossFight();
             }
         }
         if (bLeft < -50 || bLeft > window.innerWidth + 50) {
@@ -117,28 +100,35 @@ function marioShoot() {
     }, 10);
 }
 
-// Loop Colisão
-setInterval(() => {
-    if (!isAlive || isBossFight || isMiniPipePhase) return;
+// Loop de Colisão
+const collisionLoop = setInterval(() => {
+    if (!isAlive || isBossFight) return;
     const mRect = mario.getBoundingClientRect();
     const gRect = pipeGround.getBoundingClientRect();
     const cRect = pipeCeiling.getBoundingClientRect();
 
     if (pipeGround.classList.contains('pipe-animation')) {
-        if (mRect.right > gRect.left + 15 && mRect.left < gRect.right - 15 && mRect.bottom > gRect.top + 10) finishGame("Bateu no cano!");
-    }
-    if (pipeCeiling.classList.contains('pipe-animation')) {
-        if (mRect.right > cRect.left + 15 && mRect.left < cRect.right - 15) {
-            if (!isCrouching && mRect.top < cRect.bottom - 10) finishGame("Cano no teto!");
+        if (mRect.right > gRect.left + 15 && mRect.left < gRect.right - 15 && mRect.bottom > gRect.top + 10) {
+            finishGame("Bateu no cano de baixo!");
         }
     }
+
+    if (pipeCeiling.classList.contains('pipe-animation')) {
+        if (mRect.right > cRect.left + 15 && mRect.left < cRect.right - 15) {
+            if (!isCrouching && mRect.top < cRect.bottom - 5) {
+                finishGame("Cano no teto! Tinha que agachar!");
+            }
+        }
+    }
+
     score++;
     scoreElement.innerHTML = `Pontos: ${Math.floor(score / 10)}`;
-    if (Math.floor(score / 10) >= 400) startBossFight();
+    if (Math.floor(score / 10) === 400 && !isBossFight) startBossFight();
 }, 10);
 
-setInterval(() => {
-    if (!isBossFight && !isMiniPipePhase && isAlive) {
+// Alternador de Canos (Corrida Infinita)
+const pipeInterval = setInterval(() => {
+    if (!isBossFight && isAlive) {
         pipeGround.classList.remove('pipe-animation');
         pipeCeiling.classList.remove('pipe-animation');
         void pipeGround.offsetWidth; 
@@ -150,11 +140,21 @@ function startBossFight() {
     isBossFight = true;
     pipeGround.style.display = 'none'; pipeCeiling.style.display = 'none';
     boss.style.display = 'block'; healthBar.style.display = 'block';
-    setInterval(() => { if (isBossFight && isAlive) spawnBossAttack(); }, 1200);
+    const bossAttack = setInterval(() => { 
+        if (isBossFight && isAlive) spawnBossAttack(); 
+        else clearInterval(bossAttack);
+    }, 1200);
+}
+
+function endBossFight() {
+    isBossFight = false;
+    boss.style.display = 'none'; healthBar.style.display = 'none';
+    pipeGround.style.display = 'block'; pipeCeiling.style.display = 'block';
+    alert("BOSS DERROTADO! A corrida continua...");
+    bossHealth = 100; // Reseta para caso queira invocar de novo no futuro
 }
 
 function spawnBossAttack() {
-    if (!isAlive) return;
     const bullet = document.createElement('div');
     bullet.classList.add('boss-bullet');
     bullet.style.bottom = (marioPosY + 20) + 'px';
@@ -162,38 +162,15 @@ function spawnBossAttack() {
     bulletsContainer.appendChild(bullet);
     const moveB = setInterval(() => {
         let bRight = parseInt(bullet.style.right) || 0;
-        bullet.style.right = (bRight + 8) + 'px';
+        bullet.style.right = (bRight + 10) + 'px';
         const bRect = bullet.getBoundingClientRect();
         const mRect = mario.getBoundingClientRect();
         if (bRect.left < mRect.right && bRect.right > mRect.left && bRect.top < mRect.bottom && bRect.bottom > mRect.top) {
             marioLives--; updateLivesUI(); bullet.remove(); clearInterval(moveB);
-            if (marioLives <= 0) finishGame("Fogo do Boss!");
+            if (marioLives <= 0) finishGame("O Boss te fritou!");
         }
         if (bRight > window.innerWidth) { bullet.remove(); clearInterval(moveB); }
     }, 10);
-}
-
-function startMiniPipePhase() {
-    isBossFight = false; isMiniPipePhase = true;
-    boss.style.display = 'none'; healthBar.style.display = 'none';
-    board.style.background = "#1a1a1a"; 
-    setInterval(() => { if (isMiniPipePhase && isAlive) spawnMiniPipe(); }, 1500);
-}
-
-function spawnMiniPipe() {
-    if (!isAlive) return;
-    const mini = document.createElement('img');
-    mini.src = 'pipe.png'; mini.classList.add('mini-pipe');
-    mini.style.left = Math.random() > 0.5 ? '-50px' : (window.innerWidth + 50) + 'px';
-    mini.style.bottom = '0px'; enemiesContainer.appendChild(mini);
-    const ai = setInterval(() => {
-        let pLeft = parseInt(mini.style.left);
-        pLeft < marioPosX ? mini.style.left = (pLeft + 3) + 'px' : mini.style.left = (pLeft - 3) + 'px';
-        const pRect = mini.getBoundingClientRect();
-        const mRect = mario.getBoundingClientRect();
-        if (pRect.left < mRect.right && pRect.right > mRect.left && pRect.bottom > mRect.top) finishGame("Cercado!");
-        if (!isAlive || !isMiniPipePhase) { mini.remove(); clearInterval(ai); }
-    }, 30);
 }
 
 function updateLivesUI() {
@@ -203,14 +180,14 @@ function updateLivesUI() {
 }
 
 function finishGame(r) {
-    isAlive = false; mario.src = 'game-over.png';
+    isAlive = false;
     document.getElementById('death-reason').innerHTML = r;
     gameOverScreen.style.display = 'block';
 }
 
 function restartGame() { location.reload(); }
 
-// Controles Teclado
+// Controles Teclado & Mobile
 document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowUp') jump();
     if (e.key === 'ArrowLeft') move(-1);
@@ -220,55 +197,21 @@ document.addEventListener('keydown', (e) => {
 });
 document.addEventListener('keyup', (e) => { if (e.key === 'ArrowDown') crouch(false); });
 
-// Lógica de Toque Contínuo e Clique (Mobile & Desktop)
-let moveInterval = null;
-
-const setupMobileButton = (id, actionStart, actionEnd = null) => {
+let moveInt = null;
+const setupBtn = (id) => {
     const btn = document.getElementById(id);
-    if (!btn) return;
-
-    // Função para iniciar a ação
-    const handleStart = (e) => {
+    btn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         if (id === 'btn-left' || id === 'btn-right') {
-            const dir = (id === 'btn-left') ? -1 : 1;
-            if (moveInterval) clearInterval(moveInterval);
-            move(dir); // Move uma vez imediato
-            moveInterval = setInterval(() => move(dir), 50); // Continua movendo
-        } else if (id === 'btn-jump') {
-            jump();
-        } else if (id === 'btn-shoot') {
-            marioShoot();
-        } else if (id === 'btn-down') {
-            crouch(true);
-        }
-    };
-
-    // Função para parar a ação
-    const handleEnd = (e) => {
-        e.preventDefault();
-        if (id === 'btn-left' || id === 'btn-right') {
-            clearInterval(moveInterval);
-            moveInterval = null;
-        } else if (id === 'btn-down') {
-            crouch(false);
-        }
-    };
-
-    // Eventos de Pointer (abrange Toque e Mouse)
-    btn.addEventListener('pointerdown', handleStart);
-    btn.addEventListener('pointerup', handleEnd);
-    btn.addEventListener('pointerleave', handleEnd); // Para se o dedo sair do botão
+            const d = id === 'btn-left' ? -1 : 1;
+            move(d); moveInt = setInterval(() => move(d), 50);
+        } else if (id === 'btn-jump') jump();
+        else if (id === 'btn-shoot') marioShoot();
+        else if (id === 'btn-down') crouch(true);
+    });
+    const stop = () => { clearInterval(moveInt); if (id === 'btn-down') crouch(false); };
+    btn.addEventListener('pointerup', stop); btn.addEventListener('pointerleave', stop);
 };
+['btn-left', 'btn-right', 'btn-jump', 'btn-shoot', 'btn-down'].forEach(setupBtn);
 
-// Inicializa todos os botões
-setupMobileButton('btn-left');
-setupMobileButton('btn-right');
-setupMobileButton('btn-jump');
-setupMobileButton('btn-shoot');
-setupMobileButton('btn-down');
-
-// Prevenir zoom de duplo toque no celular
-document.addEventListener('touchstart', (e) => {
-    if (e.touches.length > 1) e.preventDefault();
-}, { passive: false });
+applyPhysics();
