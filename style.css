@@ -49,7 +49,7 @@ body, html {
 
 .pipe { position: absolute; bottom: 0; height: 30%; width: auto; right: -100px; }
 .pipe-ceiling { 
-    position: absolute; top: 0; height: 40%; width: auto; 
+    position: absolute; top: 0; height: 80%; width: auto; 
     right: -100px; transform: rotate(180deg); 
 }
 
@@ -78,7 +78,7 @@ body, html {
 @media (max-width: 900px) {
     .mobile-controls { display: flex; }
     /* No celular, o cano do teto é maior para forçar o agachar */
-    .pipe-ceiling { height: 60%; }
+    .pipe-ceiling { height: 80%; }
 }
 
 .d-pad, .action-buttons { display: flex; gap: 5px; }
