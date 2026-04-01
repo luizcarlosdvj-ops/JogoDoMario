@@ -18,16 +18,17 @@ let bossHealth = 100;
 let canMarioShoot = true;
 let isCrouching = false;
 
-// Física Dinâmica baseada no tamanho da tela
-let marioPosX = window.innerWidth * 0.1;
+// Física ajustada para a altura da Board
+let marioPosX = 50;
 let marioPosY = 0;
 let marioVelY = 0;
-let gravity = window.innerHeight * 0.0018; 
+let gravity = 1.2; 
 let onPlatform = true;
 let marioDirection = 1;
 
 function applyPhysics() {
     if (!isAlive) return;
+    
     marioVelY -= gravity;
     marioPosY += marioVelY;
 
@@ -47,9 +48,7 @@ function applyPhysics() {
 const move = (dir) => {
     if (!isAlive) return;
     marioDirection = dir;
-    let moveAmount = window.innerWidth * 0.025;
-    marioPosX += dir * moveAmount;
-
+    marioPosX += dir * 12;
     if (marioPosX < 0) marioPosX = 0;
     if (marioPosX > board.offsetWidth - mario.offsetWidth) marioPosX = board.offsetWidth - mario.offsetWidth;
     dir === -1 ? mario.classList.add('face-left') : mario.classList.remove('face-left');
@@ -57,7 +56,7 @@ const move = (dir) => {
 
 const jump = () => {
     if (isAlive && onPlatform && !isCrouching) {
-        marioVelY = window.innerHeight * 0.045;
+        marioVelY = 22;
         onPlatform = false;
     }
 };
@@ -82,7 +81,7 @@ function marioShoot() {
     const shotDir = marioDirection;
     const moveBullet = setInterval(() => {
         let bLeft = parseInt(bullet.style.left);
-        bullet.style.left = (bLeft + (shotDir * 18)) + 'px';
+        bullet.style.left = (bLeft + (shotDir * 15)) + 'px';
         const bRect = bullet.getBoundingClientRect();
 
         if (isBossFight) {
@@ -100,7 +99,7 @@ function marioShoot() {
     }, 10);
 }
 
-// Loop de Colisão
+// Colisão e Pontos
 setInterval(() => {
     if (!isAlive || isBossFight) return;
     const mRect = mario.getBoundingClientRect();
@@ -108,14 +107,14 @@ setInterval(() => {
     const cRect = pipeCeiling.getBoundingClientRect();
 
     if (pipeGround.classList.contains('pipe-animation')) {
-        if (mRect.right > gRect.left + 25 && mRect.left < gRect.right - 25 && mRect.bottom > gRect.top + 10) {
+        if (mRect.right > gRect.left + 10 && mRect.left < gRect.right - 10 && mRect.bottom > gRect.top + 5) {
             finishGame("Bateu no cano!");
         }
     }
     if (pipeCeiling.classList.contains('pipe-animation')) {
-        if (mRect.right > cRect.left + 25 && mRect.left < cRect.right - 25) {
-            if (!isCrouching && mRect.top < cRect.bottom - 10) {
-                finishGame("Agache para passar!");
+        if (mRect.right > cRect.left + 10 && mRect.left < cRect.right - 10) {
+            if (!isCrouching && mRect.top < cRect.bottom - 5) {
+                finishGame("Agache!");
             }
         }
     }
@@ -124,7 +123,7 @@ setInterval(() => {
     if (Math.floor(score / 10) === 400 && !isBossFight) startBossFight();
 }, 10);
 
-// Loop dos canos (Corrida Infinita)
+// Ciclo de canos
 setInterval(() => {
     if (!isBossFight && isAlive) {
         pipeGround.classList.remove('pipe-animation');
@@ -138,33 +137,29 @@ function startBossFight() {
     isBossFight = true;
     pipeGround.style.display = 'none'; pipeCeiling.style.display = 'none';
     boss.style.display = 'block'; healthBar.style.display = 'block';
-    const bossInt = setInterval(() => { 
-        if (isBossFight && isAlive) spawnBossAttack(); 
-        else clearInterval(bossInt);
-    }, 1600);
+    const bInt = setInterval(() => { if (isBossFight && isAlive) spawnBossAttack(); else clearInterval(bInt); }, 1500);
 }
 
 function endBossFight() {
     isBossFight = false;
     boss.style.display = 'none'; healthBar.style.display = 'none';
     pipeGround.style.display = 'block'; pipeCeiling.style.display = 'block';
-    bossHealth = 100;
 }
 
 function spawnBossAttack() {
     const bullet = document.createElement('div');
     bullet.classList.add('boss-bullet');
     bullet.style.bottom = (marioPosY + 20) + 'px';
-    bullet.style.right = '60px'; 
+    bullet.style.right = '50px'; 
     bulletsContainer.appendChild(bullet);
     const moveB = setInterval(() => {
         let bRight = parseInt(bullet.style.right) || 0;
-        bullet.style.right = (bRight + 12) + 'px';
+        bullet.style.right = (bRight + 10) + 'px';
         const bRect = bullet.getBoundingClientRect();
         const mRect = mario.getBoundingClientRect();
         if (bRect.left < mRect.right && bRect.right > mRect.left && bRect.top < mRect.bottom && bRect.bottom > mRect.top) {
             marioLives--; updateLivesUI(); bullet.remove(); clearInterval(moveB);
-            if (marioLives <= 0) finishGame("O Boss venceu!");
+            if (marioLives <= 0) finishGame("Game Over!");
         }
         if (bRight > window.innerWidth) { bullet.remove(); clearInterval(moveB); }
     }, 10);
@@ -176,15 +171,10 @@ function updateLivesUI() {
     marioLivesElement.innerHTML = h;
 }
 
-function finishGame(r) {
-    isAlive = false;
-    document.getElementById('death-reason').innerHTML = r;
-    gameOverScreen.style.display = 'block';
-}
-
+function finishGame(r) { isAlive = false; document.getElementById('death-reason').innerHTML = r; gameOverScreen.style.display = 'block'; }
 function restartGame() { location.reload(); }
 
-// Controles PC e Mobile
+// Controles
 document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowUp') jump();
     if (e.key === 'ArrowLeft') move(-1);
@@ -210,10 +200,5 @@ const setupBtn = (id) => {
     btn.addEventListener('pointerup', stop); btn.addEventListener('pointerleave', stop);
 };
 ['btn-left', 'btn-right', 'btn-jump', 'btn-shoot', 'btn-down'].forEach(setupBtn);
-
-// Ajusta posição inicial no resize
-window.addEventListener('resize', () => {
-    gravity = window.innerHeight * 0.0018;
-});
 
 applyPhysics();
