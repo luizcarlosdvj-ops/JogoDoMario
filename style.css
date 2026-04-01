@@ -80,6 +80,11 @@ body, html {
 @media (max-width: 768px) {
     .mobile-controls { display: flex; }
     .mario { width: 50px; height: 50px; }
+    button {
+    touch-action: none; /* Impede o navegador de tentar rolar a página enquanto você joga */
+    -webkit-user-select: none; /* Impede de selecionar o texto do botão */
+    user-select: none;
+}
 }
 
 .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
