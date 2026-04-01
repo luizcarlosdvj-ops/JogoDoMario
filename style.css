@@ -1,89 +1,96 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body, html { height: 100%; width: 100%; overflow: hidden; }
+body, html { 
+    height: 100%; width: 100%; 
+    overflow: hidden; 
+    background-color: #000; 
+    touch-action: none; /* Impede zoom e scroll acidental */
+}
 
 .game-board {
-    width: 100vw; height: 100vh;
+    width: 100vw; 
+    height: 70vh; /* Reduzido para dar espaço aos controles no celular */
     border-bottom: 20px solid #2ecc71;
-    position: relative; overflow: hidden;
+    position: relative; 
+    overflow: hidden;
     background: linear-gradient(#87CEEB, #E0F6FF);
+}
+
+@media (min-width: 769px) {
+    .game-board { height: 100vh; }
 }
 
 .info-panel {
     position: absolute; top: 20px; left: 20px; right: 20px;
     display: flex; justify-content: space-between; z-index: 20;
-    font-size: 25px; font-weight: bold;
+    font-size: 20px; font-weight: bold;
 }
 
 .mario { 
-    width: 80px; height: 80px;
+    width: 60px; height: 60px;
     position: absolute; bottom: 0; left: 100px;
     z-index: 10;
 }
 
-.mario.face-left {
-    transform: scaleX(-1);
-    transform-origin: center;
-}
+.mario.face-left { transform: scaleX(-1); }
+.mario.crouch { height: 30px; }
 
-.mario.crouch {
-    height: 40px;
+.pipe { position: absolute; bottom: 0; width: 50px; right: -60px; }
+.pipe-ceiling { 
+    position: absolute; top: 0; width: 50px; height: 400px; 
+    right: -60px; transform: rotate(180deg); 
 }
-
-.pipe { position: absolute; bottom: 0; width: 60px; right: -60px; }
-.pipe-ceiling { position: absolute; top: 0; width: 60px; height: 900px; right: -60px; transform: rotate(180deg); }
 
 .pipe-animation { animation: pipe-move 1.8s infinite linear; }
+@keyframes pipe-move { from { right: -60px; } to { right: 100%; } }
 
-@keyframes pipe-move {
-    from { right: -60px; }
-    to { right: 100%; }
-}
+.clouds { position: absolute; width: 250px; animation: clouds-move 20s infinite linear; }
+@keyframes clouds-move { from { right: -400px; } to { right: 100%; } }
 
-.clouds {
-    position: absolute;
-    width: 400px;
-    animation: clouds-move 20s infinite linear;
-}
-
-@keyframes clouds-move {
-    from { right: -400px; }
-    to { right: 100%; }
-}
-
-.platform {
-    position: absolute; width: 180px; height: 25px;
-    background: brown; z-index: 5;
-}
-
-.boss { position: absolute; right: 50px; bottom: 0; width: 150px; height: 200px; }
-
+.boss { position: absolute; right: 50px; bottom: 0; width: 120px; height: 160px; }
 #boss-health-bar { 
-    position: absolute; top: 80px; left: 50%;
+    position: absolute; top: 60px; left: 50%;
     transform: translateX(-50%);
-    width: 300px; height: 20px;
-    background: #555;
-    display: none;
+    width: 200px; height: 15px;
+    background: #555; display: none;
 }
-
-#health-fill {
-    width: 100%;
-    height: 100%;
-    background: red;
-}
+#health-fill { width: 100%; height: 100%; background: red; }
 
 .mario-bullet, .boss-bullet {
-    position: absolute;
-    width: 30px; height: 30px;
-    background-image: url('bola.png');
-    background-size: cover;
+    position: absolute; width: 25px; height: 25px;
+    background-image: url('bola.png'); background-size: cover;
 }
-
-.mini-pipe { position: absolute; width: 45px; height: 60px; }
 
 .game-over-screen {
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    display: none;
-    background: black; color: white;
-    padding: 30px;
+    display: none; background: rgba(0,0,0,0.9); color: white;
+    padding: 30px; text-align: center; z-index: 100;
 }
+
+/* CONTROLES MOBILE */
+.mobile-controls {
+    display: none;
+    height: 30vh;
+    background: #222;
+    padding: 10px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .mobile-controls { display: flex; }
+    .mario { width: 50px; height: 50px; }
+}
+
+.d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+.action-buttons { display: flex; gap: 10px; }
+
+.mobile-controls button {
+    width: 65px; height: 65px;
+    background: #444; border: 2px solid #fff;
+    border-radius: 50%; color: white;
+    font-weight: bold; font-size: 12px;
+    touch-action: none;
+}
+
+.mobile-controls button:active { background: #666; }
