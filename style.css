@@ -1,57 +1,59 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body, html { 
     height: 100%; width: 100%; 
-    overflow: hidden; 
-    background-color: #000; 
-    touch-action: none; /* Impede zoom e scroll acidental */
+    overflow: hidden; background-color: #000; 
+    font-family: Arial, sans-serif; touch-action: none;
+}
+
+#orientation-warning {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #111; color: white; z-index: 9999; text-align: center; padding-top: 20vh;
+}
+@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(90deg); } }
+.phone-icon { font-size: 50px; margin-top: 20px; animation: rotate 2s infinite; }
+
+@media (orientation: portrait) and (max-width: 900px) {
+    #orientation-warning { display: block; }
+    .game-board, .mobile-controls { display: none; }
 }
 
 .game-board {
-    width: 100vw; 
-    height: 70vh; /* Reduzido para dar espaço aos controles no celular */
-    border-bottom: 20px solid #2ecc71;
-    position: relative; 
-    overflow: hidden;
-    background: linear-gradient(#87CEEB, #E0F6FF);
-}
-
-@media (min-width: 769px) {
-    .game-board { height: 100vh; }
+    width: 100vw; height: 100vh; border-bottom: 20px solid #2ecc71;
+    position: relative; overflow: hidden; background: linear-gradient(#87CEEB, #E0F6FF);
 }
 
 .info-panel {
     position: absolute; top: 20px; left: 20px; right: 20px;
     display: flex; justify-content: space-between; z-index: 20;
-    font-size: 20px; font-weight: bold;
+    font-size: 20px; font-weight: bold; color: #333;
 }
 
 .mario { 
-    width: 60px; height: 60px;
-    position: absolute; bottom: 0; left: 100px;
-    z-index: 10;
+    width: 60px; height: 60px; position: absolute; bottom: 0; left: 100px;
+    z-index: 10; transition: height 0.1s;
 }
-
 .mario.face-left { transform: scaleX(-1); }
-.mario.crouch { height: 30px; }
+.mario.crouch { height: 30px !important; }
 
-.pipe { position: absolute; bottom: 0; width: 50px; right: -60px; }
+.pipe { position: absolute; bottom: 0; width: 55px; right: -60px; }
+
+/* AJUSTE CRÍTICO: No PC o cano é menor para permitir o pulo */
 .pipe-ceiling { 
-    position: absolute; top: 0; width: 50px; height: 400px; 
+    position: absolute; top: 0; width: 55px; 
+    height: 900px; /* Altura padrão para PC */
     right: -60px; transform: rotate(180deg); 
 }
 
 .pipe-animation { animation: pipe-move 1.8s infinite linear; }
 @keyframes pipe-move { from { right: -60px; } to { right: 100%; } }
 
-.clouds { position: absolute; width: 250px; animation: clouds-move 20s infinite linear; }
+.clouds { position: absolute; width: 300px; animation: clouds-move 25s infinite linear; }
 @keyframes clouds-move { from { right: -400px; } to { right: 100%; } }
 
-.boss { position: absolute; right: 50px; bottom: 0; width: 120px; height: 160px; }
+.boss { position: absolute; right: 50px; bottom: 0; width: 130px; height: 180px; }
 #boss-health-bar { 
-    position: absolute; top: 60px; left: 50%;
-    transform: translateX(-50%);
-    width: 200px; height: 15px;
-    background: #555; display: none;
+    position: absolute; top: 70px; left: 50%; transform: translateX(-50%);
+    width: 250px; height: 20px; background: #555; display: none; border: 2px solid #000;
 }
 #health-fill { width: 100%; height: 100%; background: red; }
 
@@ -61,41 +63,27 @@ body, html {
 }
 
 .game-over-screen {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    display: none; background: rgba(0,0,0,0.9); color: white;
-    padding: 30px; text-align: center; z-index: 100;
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    display: none; background: rgba(0,0,0,0.8); color: white;
+    padding: 40px; text-align: center; z-index: 100; border-radius: 15px;
 }
 
-/* CONTROLES MOBILE */
 .mobile-controls {
-    display: none;
-    height: 30vh;
-    background: #222;
-    padding: 10px;
-    justify-content: space-between;
-    align-items: center;
+    display: none; position: fixed; bottom: 20px; width: 100%;
+    justify-content: space-between; padding: 0 40px; z-index: 1000;
 }
 
-@media (max-width: 768px) {
+/* AJUSTE PARA MOBILE DEITADO */
+@media (max-width: 900px) {
     .mobile-controls { display: flex; }
     .mario { width: 50px; height: 50px; }
-    button {
-    touch-action: none; /* Impede o navegador de tentar rolar a página enquanto você joga */
-    -webkit-user-select: none; /* Impede de selecionar o texto do botão */
-    user-select: none;
-}
+    /* No celular, o cano ocupa mais espaço para forçar o agachar */
+    .pipe-ceiling { height: 80%; } 
 }
 
-.d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
-.action-buttons { display: flex; gap: 10px; }
-
+.d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .mobile-controls button {
-    width: 65px; height: 65px;
-    background: #444; border: 2px solid #fff;
-    border-radius: 50%; color: white;
-    font-weight: bold; font-size: 12px;
-    touch-action: none;
+    width: 70px; height: 70px; background: rgba(0, 0, 0, 0.4); 
+    border: 2px solid #fff; border-radius: 50%; color: white; font-weight: bold;
+    touch-action: none; user-select: none;
 }
-
-.mobile-controls button:active { background: #666; }
