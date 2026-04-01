@@ -80,7 +80,7 @@ body, html {
 @media (max-width: 900px) {
     .mobile-controls { display: flex; }
     /* No celular deitado, o cano do teto desce mais para obrigar o agachar */
-    .pipe-ceiling { height: 65vh; } 
+    .pipe-ceiling { height: 85vh; } 
 }
 
 .d-pad, .action-buttons { pointer-events: auto; }
