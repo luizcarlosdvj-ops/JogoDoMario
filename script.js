@@ -7,8 +7,8 @@ const boss = document.getElementById('boss');
 const healthBar = document.getElementById('boss-health-bar');
 const healthFill = document.getElementById('health-fill');
 const bulletsContainer = document.getElementById('bullets-container');
-const enemiesContainer = document.getElementById('enemies-container');
 const gameOverScreen = document.getElementById('gameOverScreen');
+const victoryScreen = document.getElementById('victoryScreen');
 const board = document.querySelector('.game-board');
 
 let score = 0;
@@ -33,8 +33,11 @@ function applyPhysics() {
     marioVelY -= gravity;
     marioPosY += marioVelY;
 
-    if (marioPosY <= 0) {
-        marioPosY = 0;
+    // Ajuste de altura do chão para mobile
+    const floorLimit = window.innerWidth < 900 ? 15 : 0;
+
+    if (marioPosY <= floorLimit) {
+        marioPosY = floorLimit;
         marioVelY = 0;
         onPlatform = true;
     } else {
@@ -73,11 +76,7 @@ const jump = () => {
 const crouch = (state) => {
     if (!isAlive) return;
     isCrouching = state;
-    if (state) {
-        mario.classList.add('crouch');
-    } else {
-        mario.classList.remove('crouch');
-    }
+    state ? mario.classList.add('crouch') : mario.classList.remove('crouch');
 };
 
 function marioShoot() {
@@ -112,7 +111,7 @@ function marioShoot() {
     }, 10);
 }
 
-// Loop Principal de Colisão
+// Loop Principal
 setInterval(() => {
     if (!isAlive || isBossFight || isMiniPipePhase) return;
     const mRect = mario.getBoundingClientRect();
@@ -138,7 +137,6 @@ setInterval(() => {
     if (Math.floor(score / 10) >= 400) startBossFight();
 }, 10);
 
-// Alternar canos fase 1
 setInterval(() => {
     if (!isBossFight && !isMiniPipePhase && isAlive) {
         pipeGround.classList.remove('pipe-animation');
@@ -174,23 +172,14 @@ function spawnBossAttack() {
         if (bRight > window.innerWidth) { bullet.remove(); clearInterval(moveB); }
     }, 10);
 }
+
 function startMiniPipePhase() {
-    isBossFight = false; 
-    isMiniPipePhase = true; // Mantém a lógica existente
-    isAlive = false; // Para o jogo
-    
-    boss.style.display = 'none'; 
+    isBossFight = false;
+    isAlive = false;
+    boss.style.display = 'none';
     healthBar.style.display = 'none';
-    board.style.background = "#1a1a1a"; 
-    
-    // Exibe a tela de vitória
-    const victoryScreen = document.getElementById('victoryScreen');
-    const finalScore = document.getElementById('final-score');
-    
-    if (victoryScreen) {
-        victoryScreen.style.display = 'block';
-        finalScore.innerHTML = `Pontuação Final: ${Math.floor(score / 10)}`;
-    }
+    victoryScreen.style.display = 'block';
+    document.getElementById('final-score').innerHTML = `Pontos: ${Math.floor(score/10)}`;
 }
 
 function updateLivesUI() {
@@ -208,7 +197,7 @@ function finishGame(r) {
 
 function restartGame() { location.reload(); }
 
-// CONTROLES PC (Teclado)
+// Controles... (mesma lógica de event listeners do código anterior)
 document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowUp') jump();
     if (e.key === 'ArrowLeft') move(-1);
@@ -218,12 +207,10 @@ document.addEventListener('keydown', (e) => {
 });
 document.addEventListener('keyup', (e) => { if (e.key === 'ArrowDown') crouch(false); });
 
-// CONTROLES MOBILE (Toque Contínuo)
 let moveInterval = null;
-const setupMobileButton = (id, actionStart, actionEnd = null) => {
+const setupMobileButton = (id) => {
     const btn = document.getElementById(id);
     if (!btn) return;
-
     btn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         if (id === 'btn-left' || id === 'btn-right') {
@@ -234,21 +221,14 @@ const setupMobileButton = (id, actionStart, actionEnd = null) => {
         else if (id === 'btn-shoot') marioShoot();
         else if (id === 'btn-down') crouch(true);
     });
-
     const stopAction = (e) => {
         e.preventDefault();
         clearInterval(moveInterval);
         if (id === 'btn-down') crouch(false);
     };
-
     btn.addEventListener('pointerup', stopAction);
     btn.addEventListener('pointerleave', stopAction);
 };
 
-setupMobileButton('btn-left');
-setupMobileButton('btn-right');
-setupMobileButton('btn-jump');
-setupMobileButton('btn-shoot');
-setupMobileButton('btn-down');
-
+['btn-left', 'btn-right', 'btn-jump', 'btn-shoot', 'btn-down'].forEach(setupMobileButton);
 applyPhysics();
