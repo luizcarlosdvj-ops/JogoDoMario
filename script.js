@@ -174,11 +174,23 @@ function spawnBossAttack() {
         if (bRight > window.innerWidth) { bullet.remove(); clearInterval(moveB); }
     }, 10);
 }
-
 function startMiniPipePhase() {
-    isBossFight = false; isMiniPipePhase = true;
-    boss.style.display = 'none'; healthBar.style.display = 'none';
+    isBossFight = false; 
+    isMiniPipePhase = true; // Mantém a lógica existente
+    isAlive = false; // Para o jogo
+    
+    boss.style.display = 'none'; 
+    healthBar.style.display = 'none';
     board.style.background = "#1a1a1a"; 
+    
+    // Exibe a tela de vitória
+    const victoryScreen = document.getElementById('victoryScreen');
+    const finalScore = document.getElementById('final-score');
+    
+    if (victoryScreen) {
+        victoryScreen.style.display = 'block';
+        finalScore.innerHTML = `Pontuação Final: ${Math.floor(score / 10)}`;
+    }
 }
 
 function updateLivesUI() {
