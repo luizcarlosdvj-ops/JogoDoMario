@@ -1,106 +1,48 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
 body, html { 
     height: 100%; width: 100%; 
     overflow: hidden; background-color: #000; 
-    font-family: 'Arial', sans-serif; touch-action: none;
+    font-family: 'Arial', sans-serif;
+    touch-action: none; /* IMPEDE O SCROLL DO NAVEGADOR */
 }
 
-#orientation-warning {
-    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: #111; color: white; z-index: 9999; text-align: center; padding-top: 20vh;
-}
-.phone-icon { font-size: 50px; margin-top: 20px; animation: rotate 2s infinite; }
-@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(90deg); } }
-
-@media (orientation: portrait) and (max-width: 900px) {
-    #orientation-warning { display: block; }
-    .game-board, .mobile-controls { display: none; }
+.game-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
 
 .game-board {
-    width: 100vw; height: 100vh;
-    border-bottom: 8vh solid #2ecc71; /* Chão mais grosso para visibilidade */
+    flex: 1;
     position: relative; overflow: hidden; 
     background: linear-gradient(#87CEEB, #E0F6FF);
+    border-bottom: 60px solid #2ecc71;
 }
 
-.info-panel {
-    position: absolute; top: 2vh; left: 5vw; right: 5vw;
-    display: flex; justify-content: space-between; z-index: 20;
-    font-size: 18px; font-weight: bold; color: #333;
-}
-
-.mario { 
-    width: 12vh; height: 12vh; 
-    position: absolute; bottom: 0; left: 10vw;
-    z-index: 10;
-}
+.mario { width: 60px; height: 60px; position: absolute; bottom: 0; left: 50px; z-index: 10; }
 .mario.face-left { transform: scaleX(-1); }
-.mario.crouch { height: 6vh !important; }
+.mario.crouch { height: 30px !important; }
 
-.pipe { position: absolute; bottom: 0; width: 10vh; height: 25vh; right: -20vh; }
-.pipe-ceiling { 
-    position: absolute; top: 0; width: 10vh; 
-    height: 90vh; 
-    right: -20vh; transform: rotate(180deg); 
+/* CONTROLES */
+.mobile-controls {
+    display: flex; position: fixed; bottom: 15px; width: 100%;
+    justify-content: space-between; padding: 0 20px; z-index: 1000;
 }
 
-.pipe-animation { animation: pipe-move 2s infinite linear; }
-@keyframes pipe-move { from { right: -20vh; } to { right: 110%; } }
-
-.clouds { position: absolute; width: 30vh; top: 10vh; animation: clouds-move 25s infinite linear; }
-@keyframes clouds-move { from { right: -40vh; } to { right: 110%; } }
-
-.boss { position: absolute; right: 5vw; bottom: 0; width: 25vh; height: 35vh; }
-#boss-health-bar { 
-    position: absolute; top: 15vh; left: 50%; transform: translateX(-50%);
-    width: 40vw; height: 3vh; background: #555; display: none; border: 2px solid #000;
+.mobile-controls button {
+    width: 65px; height: 65px; 
+    background: rgba(0, 0, 0, 0.5); 
+    border: 2px solid #fff; border-radius: 50%;
+    color: white; font-size: 14px;
+    touch-action: manipulation; /* MELHORA O CLIQUE */
 }
-#health-fill { width: 100%; height: 100%; background: red; }
 
-.mario-bullet, .boss-bullet {
-    position: absolute; width: 5vh; height: 5vh;
-    background-image: url('bola.png'); background-size: cover;
-}
+.d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.action-buttons { display: flex; gap: 15px; align-items: flex-end; }
 
 .game-over-screen {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
     display: none; background: rgba(0,0,0,0.8); color: white;
-    padding: 5vh; text-align: center; z-index: 100; border-radius: 15px;
-}
-
-/* CONTROLES MOBILE */
-.mobile-controls {
-    display: none; position: fixed; bottom: 2vh; width: 100%;
-    justify-content: space-between; padding: 0 5vw; z-index: 1000;
-    pointer-events: none;
-}
-
-@media (max-width: 900px) {
-    .mobile-controls { 
-        display: flex; 
-        /* Usa 'safe-area-inset' para fugir da barra de navegação/gestos */
-        bottom: calc(5vh + env(safe-area-inset-bottom)); 
-        padding: 0 8vw;
-    }
-    
-    .pipe-ceiling { height: 80vh; } 
-    
-    .mario { 
-        bottom: 4vh; /* Sobe o Mario um pouco mais para fugir da barra */
-        width: 13vh; 
-        height: 13vh; 
-    }
-
-    /* Botões menores e mais centralizados */
-    .mobile-controls button {
-        width: 10vh; 
-        height: 10vh; 
-        font-size: 12px;
-        background: rgba(255, 255, 255, 0.15); /* Ainda mais transparente */
-        border: 1px solid rgba(255,255,255,0.2);
-    }
-
-    .d-pad { gap: 10px; }
-    .action-buttons { gap: 15px; }
+    padding: 30px; text-align: center; z-index: 100; border-radius: 15px;
 }
