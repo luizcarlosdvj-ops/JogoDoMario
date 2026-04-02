@@ -188,7 +188,7 @@ setInterval(() => {
     const cRect = pipeCeiling.getBoundingClientRect();
 
     score++;
-    gameSpeed = 1 + Math.floor(score / 100) * 0.15;
+    gameSpeed = 1 + Math.floor(score / 150) * 0.10;
 
     pipeGround.style.animationDuration = (2 / gameSpeed) + 's';
     pipeCeiling.style.animationDuration = (2 / gameSpeed) + 's';
