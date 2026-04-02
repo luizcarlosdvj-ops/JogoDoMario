@@ -7,6 +7,7 @@ const boss = document.getElementById('boss');
 const healthBar = document.getElementById('boss-health-bar');
 const healthFill = document.getElementById('health-fill');
 const bulletsContainer = document.getElementById('bullets-container');
+const enemiesContainer = document.getElementById('enemies-container');
 const gameOverScreen = document.getElementById('gameOverScreen');
 const board = document.querySelector('.game-board');
 
@@ -14,21 +15,21 @@ let score = 0;
 let marioLives = 3;
 let isAlive = true;
 let isBossFight = false;
+let isMiniPipePhase = false;
 let bossHealth = 100;
 let canMarioShoot = true;
 let isCrouching = false;
 
-// Física ajustada para a altura da Board
-let marioPosX = 50;
+// Física
+let marioPosX = 100;
 let marioPosY = 0;
 let marioVelY = 0;
-let gravity = 1.2; 
+let gravity = 0.8;
 let onPlatform = true;
 let marioDirection = 1;
 
 function applyPhysics() {
     if (!isAlive) return;
-    
     marioVelY -= gravity;
     marioPosY += marioVelY;
 
@@ -48,15 +49,23 @@ function applyPhysics() {
 const move = (dir) => {
     if (!isAlive) return;
     marioDirection = dir;
-    marioPosX += dir * 12;
+    let moveAmount = 15;
+
+    if (!isBossFight && !isMiniPipePhase) {
+        if (dir === 1) marioPosX += moveAmount;
+        if (dir === -1 && marioPosX > 50) marioPosX -= moveAmount;
+    } else {
+        marioPosX += dir * moveAmount;
+    }
+
     if (marioPosX < 0) marioPosX = 0;
-    if (marioPosX > board.offsetWidth - mario.offsetWidth) marioPosX = board.offsetWidth - mario.offsetWidth;
+    if (marioPosX > board.offsetWidth - 60) marioPosX = board.offsetWidth - 60;
     dir === -1 ? mario.classList.add('face-left') : mario.classList.remove('face-left');
 };
 
 const jump = () => {
     if (isAlive && onPlatform && !isCrouching) {
-        marioVelY = 22;
+        marioVelY = 18;
         onPlatform = false;
     }
 };
@@ -64,24 +73,28 @@ const jump = () => {
 const crouch = (state) => {
     if (!isAlive) return;
     isCrouching = state;
-    state ? mario.classList.add('crouch') : mario.classList.remove('crouch');
+    if (state) {
+        mario.classList.add('crouch');
+    } else {
+        mario.classList.remove('crouch');
+    }
 };
 
 function marioShoot() {
-    if (!isAlive || !canMarioShoot) return;
+    if (!isAlive || !canMarioShoot || (!isBossFight && !isMiniPipePhase)) return;
     canMarioShoot = false;
     setTimeout(() => canMarioShoot = true, 400);
 
     const bullet = document.createElement('div');
     bullet.classList.add('mario-bullet');
-    bullet.style.bottom = (marioPosY + (mario.offsetHeight / 2)) + 'px';
-    bullet.style.left = (marioPosX + (marioDirection === 1 ? mario.offsetWidth : -10)) + 'px';
+    bullet.style.bottom = (marioPosY + 30) + 'px';
+    bullet.style.left = (marioPosX + (marioDirection === 1 ? 50 : -5)) + 'px';
     bulletsContainer.appendChild(bullet);
 
     const shotDir = marioDirection;
     const moveBullet = setInterval(() => {
         let bLeft = parseInt(bullet.style.left);
-        bullet.style.left = (bLeft + (shotDir * 15)) + 'px';
+        bullet.style.left = (bLeft + (shotDir * 12)) + 'px';
         const bRect = bullet.getBoundingClientRect();
 
         if (isBossFight) {
@@ -90,7 +103,7 @@ function marioShoot() {
                 bossHealth -= 5;
                 healthFill.style.width = bossHealth + '%';
                 bullet.remove(); clearInterval(moveBullet);
-                if (bossHealth <= 0) endBossFight();
+                if (bossHealth <= 0) startMiniPipePhase();
             }
         }
         if (bLeft < -50 || bLeft > window.innerWidth + 50) {
@@ -99,58 +112,55 @@ function marioShoot() {
     }, 10);
 }
 
-// Colisão e Pontos
+// Loop Principal de Colisão
 setInterval(() => {
-    if (!isAlive || isBossFight) return;
+    if (!isAlive || isBossFight || isMiniPipePhase) return;
     const mRect = mario.getBoundingClientRect();
     const gRect = pipeGround.getBoundingClientRect();
     const cRect = pipeCeiling.getBoundingClientRect();
 
     if (pipeGround.classList.contains('pipe-animation')) {
-        if (mRect.right > gRect.left + 10 && mRect.left < gRect.right - 10 && mRect.bottom > gRect.top + 5) {
-            finishGame("Bateu no cano!");
+        if (mRect.right > gRect.left + 15 && mRect.left < gRect.right - 15 && mRect.bottom > gRect.top + 10) {
+            finishGame("Bateu no cano de baixo!");
         }
     }
+
     if (pipeCeiling.classList.contains('pipe-animation')) {
-        if (mRect.right > cRect.left + 10 && mRect.left < cRect.right - 10) {
+        if (mRect.right > cRect.left + 15 && mRect.left < cRect.right - 15) {
             if (!isCrouching && mRect.top < cRect.bottom - 5) {
-                finishGame("Agache!");
+                finishGame("Cano no teto! Tinha que agachar!");
             }
         }
     }
+
     score++;
     scoreElement.innerHTML = `Pontos: ${Math.floor(score / 10)}`;
-    if (Math.floor(score / 10) === 400 && !isBossFight) startBossFight();
+    if (Math.floor(score / 10) >= 400) startBossFight();
 }, 10);
 
-// Ciclo de canos
+// Alternar canos fase 1
 setInterval(() => {
-    if (!isBossFight && isAlive) {
+    if (!isBossFight && !isMiniPipePhase && isAlive) {
         pipeGround.classList.remove('pipe-animation');
         pipeCeiling.classList.remove('pipe-animation');
         void pipeGround.offsetWidth; 
         Math.random() > 0.5 ? pipeGround.classList.add('pipe-animation') : pipeCeiling.classList.add('pipe-animation');
     }
-}, 2400);
+}, 1800);
 
 function startBossFight() {
     isBossFight = true;
     pipeGround.style.display = 'none'; pipeCeiling.style.display = 'none';
     boss.style.display = 'block'; healthBar.style.display = 'block';
-    const bInt = setInterval(() => { if (isBossFight && isAlive) spawnBossAttack(); else clearInterval(bInt); }, 1500);
-}
-
-function endBossFight() {
-    isBossFight = false;
-    boss.style.display = 'none'; healthBar.style.display = 'none';
-    pipeGround.style.display = 'block'; pipeCeiling.style.display = 'block';
+    setInterval(() => { if (isBossFight && isAlive) spawnBossAttack(); }, 1200);
 }
 
 function spawnBossAttack() {
+    if (!isAlive) return;
     const bullet = document.createElement('div');
     bullet.classList.add('boss-bullet');
     bullet.style.bottom = (marioPosY + 20) + 'px';
-    bullet.style.right = '50px'; 
+    bullet.style.right = '100px'; 
     bulletsContainer.appendChild(bullet);
     const moveB = setInterval(() => {
         let bRight = parseInt(bullet.style.right) || 0;
@@ -159,10 +169,16 @@ function spawnBossAttack() {
         const mRect = mario.getBoundingClientRect();
         if (bRect.left < mRect.right && bRect.right > mRect.left && bRect.top < mRect.bottom && bRect.bottom > mRect.top) {
             marioLives--; updateLivesUI(); bullet.remove(); clearInterval(moveB);
-            if (marioLives <= 0) finishGame("Game Over!");
+            if (marioLives <= 0) finishGame("O Boss te fritou!");
         }
         if (bRight > window.innerWidth) { bullet.remove(); clearInterval(moveB); }
     }, 10);
+}
+
+function startMiniPipePhase() {
+    isBossFight = false; isMiniPipePhase = true;
+    boss.style.display = 'none'; healthBar.style.display = 'none';
+    board.style.background = "#1a1a1a"; 
 }
 
 function updateLivesUI() {
@@ -171,10 +187,16 @@ function updateLivesUI() {
     marioLivesElement.innerHTML = h;
 }
 
-function finishGame(r) { isAlive = false; document.getElementById('death-reason').innerHTML = r; gameOverScreen.style.display = 'block'; }
+function finishGame(r) {
+    isAlive = false;
+    mario.style.display = 'none';
+    document.getElementById('death-reason').innerHTML = r;
+    gameOverScreen.style.display = 'block';
+}
+
 function restartGame() { location.reload(); }
 
-// Controles
+// CONTROLES PC (Teclado)
 document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowUp') jump();
     if (e.key === 'ArrowLeft') move(-1);
@@ -184,21 +206,37 @@ document.addEventListener('keydown', (e) => {
 });
 document.addEventListener('keyup', (e) => { if (e.key === 'ArrowDown') crouch(false); });
 
-let moveInt = null;
-const setupBtn = (id) => {
+// CONTROLES MOBILE (Toque Contínuo)
+let moveInterval = null;
+const setupMobileButton = (id, actionStart, actionEnd = null) => {
     const btn = document.getElementById(id);
+    if (!btn) return;
+
     btn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         if (id === 'btn-left' || id === 'btn-right') {
-            const d = id === 'btn-left' ? -1 : 1;
-            move(d); moveInt = setInterval(() => move(d), 50);
+            const dir = (id === 'btn-left') ? -1 : 1;
+            move(dir);
+            moveInterval = setInterval(() => move(dir), 50);
         } else if (id === 'btn-jump') jump();
         else if (id === 'btn-shoot') marioShoot();
         else if (id === 'btn-down') crouch(true);
     });
-    const stop = () => { clearInterval(moveInt); if (id === 'btn-down') crouch(false); };
-    btn.addEventListener('pointerup', stop); btn.addEventListener('pointerleave', stop);
+
+    const stopAction = (e) => {
+        e.preventDefault();
+        clearInterval(moveInterval);
+        if (id === 'btn-down') crouch(false);
+    };
+
+    btn.addEventListener('pointerup', stopAction);
+    btn.addEventListener('pointerleave', stopAction);
 };
-['btn-left', 'btn-right', 'btn-jump', 'btn-shoot', 'btn-down'].forEach(setupBtn);
+
+setupMobileButton('btn-left');
+setupMobileButton('btn-right');
+setupMobileButton('btn-jump');
+setupMobileButton('btn-shoot');
+setupMobileButton('btn-down');
 
 applyPhysics();
