@@ -42,7 +42,7 @@ body, html {
 
 .pipe-ceiling { 
     position: absolute; top: 0; width: 10vh; 
-    height: 35vh; /* Altura fixa para PC/Padrão */
+    height: 90vh; /* Altura fixa para PC/Padrão */
     right: -20vh; transform: rotate(180deg); 
 }
 
