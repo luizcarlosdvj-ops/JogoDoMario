@@ -92,3 +92,8 @@ body, html {
     background: rgba(0, 0, 0, 0.3); border: 2px solid rgba(255,255,255,0.5); 
     border-radius: 50%; color: white; font-size: 10px;
 }
+#victoryScreen {
+    display: none;
+    border: 5px solid #fff;
+    box-shadow: 0 0 20px #2ecc71;
+}
