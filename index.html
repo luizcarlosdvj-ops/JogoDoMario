@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Mario Game - Fullscreen Edition</title>
+    <title>Mario Game - Fixed Mobile</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,43 +12,48 @@
         <div class="phone-icon">🔄</div>
     </div>
 
-    <div class="game-board">
-        <div class="info-panel">
-            <div class="score">Pontos: 0</div>
-            <div id="mario-lives">Vidas: ❤️❤️❤️</div>
+    <div class="game-container">
+        <div class="game-board">
+            <div class="info-panel">
+                <div class="score">Pontos: 0</div>
+                <div id="mario-lives">Vidas: ❤️❤️❤️</div>
+            </div>
+            
+            <img src="clouds.png" class="clouds">
+            <img src="pipe.png" class="pipe" id="pipeGround">
+            <img src="pipe.png" class="pipe-ceiling" id="pipeCeiling">
+            <img src="pipe.png" class="boss" id="boss" style="display: none;">
+            
+            <div id="boss-health-bar"><div id="health-fill"></div></div>
+            <div id="bullets-container"></div>
+            
+            <img src="mario.gif" class="mario">
+
+            <div class="game-over-screen" id="gameOverScreen">
+                <h1>GAME OVER</h1>
+                <p id="death-reason"></p>
+                <button onclick="restartGame()">RESTART</button>
+            </div>
         </div>
-        
-        <img src="clouds.png" class="clouds">
-        <img src="pipe.png" class="pipe" id="pipeGround">
-        <img src="pipe.png" class="pipe-ceiling" id="pipeCeiling">
 
-        <img src="pipe.png" class="boss" id="boss" style="display: none;">
-        <div id="boss-health-bar">
-            <div id="health-fill"></div>
-        </div>
-
-        <div id="bullets-container"></div>
-        <img src="mario.gif" class="mario">
-
-        <div class="game-over-screen" id="gameOverScreen">
-            <h1>GAME OVER</h1>
-            <p id="death-reason"></p>
-            <button onclick="restartGame()">RESTART</button>
+        <div class="mobile-controls">
+            <div class="d-pad">
+                <button id="btn-left">◀</button>
+                <button id="btn-down">▼</button>
+                <button id="btn-right">▶</button>
+            </div>
+            <div class="action-buttons">
+                <button id="btn-shoot">TIRO</button>
+                <button id="btn-jump">PULAR</button>
+            </div>
         </div>
     </div>
-
-    <div class="mobile-controls">
-        <div class="d-pad">
-            <button id="btn-left">◀</button>
-            <button id="btn-down">▼</button>
-            <button id="btn-right">▶</button>
-        </div>
-        <div class="action-buttons">
-            <button id="btn-shoot">TIRO</button>
-            <button id="btn-jump">PULAR</button>
-        </div>
-    </div>
-
+    <div class="game-over-screen" id="victoryScreen" style="background: rgba(46, 204, 113, 0.9);">
+    <h1>VITÓRIA!</h1>
+    <p>Você derrotou o Chefão e salvou o dia!</p>
+    <h2 id="final-score"></h2>
+    <button onclick="restartGame()">JOGAR NOVAMENTE</button>
+</div>
     <script src="script.js" defer></script>
 </body>
 </html>
