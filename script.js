@@ -12,7 +12,7 @@ const board = document.querySelector('.game-board');
 let score = 0;
 let isAlive = true;
 let isBossFight = false;
-let bossHealth = 100;
+let bossHealth = 200;
 let marioPosX = 50;
 let marioPosY = 0;
 let marioVelY = 0;
@@ -20,6 +20,7 @@ let gravity = 0.8;
 let onPlatform = true;
 let marioDirection = 1;
 let isCrouching = false;
+let gameSpeed = 1;
 
 function applyPhysics() {
     if (!isAlive) return;
@@ -45,7 +46,7 @@ const move = (dir) => {
     if (!isAlive) return;
 
     marioDirection = dir;
-    marioPosX += dir * 15;
+    marioPosX += dir * (15 * gameSpeed);
 
     if (marioPosX < 0) marioPosX = 0;
     if (marioPosX > board.offsetWidth - mario.offsetWidth) {
@@ -82,6 +83,11 @@ function startBossFight() {
 
     boss.style.display = 'block';
     healthBar.style.display = 'block';
+
+    // Boss começa a atirar
+    setInterval(() => {
+        spawnBossShot();
+    }, 1200);
 }
 
 function marioShoot() {
@@ -97,7 +103,7 @@ function marioShoot() {
 
     const moveB = setInterval(() => {
         let bLeft = parseInt(bullet.style.left);
-        bullet.style.left = (bLeft + 10) + 'px';
+        bullet.style.left = (bLeft + (10 * gameSpeed)) + 'px';
 
         const bRect = bullet.getBoundingClientRect();
         const bossRect = boss.getBoundingClientRect();
@@ -107,7 +113,7 @@ function marioShoot() {
             bRect.top < bossRect.bottom &&
             bRect.bottom > bossRect.top
         ) {
-            bossHealth -= 5;
+            bossHealth -= 3;
             healthFill.style.width = bossHealth + '%';
 
             bullet.remove();
@@ -127,6 +133,47 @@ function marioShoot() {
     }, 10);
 }
 
+// 👹 ATAQUE DO BOSS
+function spawnBossShot() {
+    if (!isAlive || !isBossFight) return;
+
+    const bullet = document.createElement('div');
+    bullet.classList.add('boss-bullet');
+
+    const heights = [20, 60, 100];
+    const h = heights[Math.floor(Math.random() * heights.length)];
+
+    bullet.style.bottom = h + 'px';
+    bullet.style.left = (board.offsetWidth - 120) + 'px';
+
+    document.getElementById('bullets-container').appendChild(bullet);
+
+    const moveShot = setInterval(() => {
+        let bLeft = parseInt(bullet.style.left);
+        bullet.style.left = (bLeft - (8 * gameSpeed)) + 'px';
+
+        const bRect = bullet.getBoundingClientRect();
+        const mRect = mario.getBoundingClientRect();
+
+        if (
+            bRect.right > mRect.left &&
+            bRect.left < mRect.right &&
+            bRect.top < mRect.bottom &&
+            bRect.bottom > mRect.top
+        ) {
+            finishGame("O Boss te destruiu 💀");
+            bullet.remove();
+            clearInterval(moveShot);
+        }
+
+        if (bLeft < -50) {
+            bullet.remove();
+            clearInterval(moveShot);
+        }
+
+    }, 20);
+}
+
 // LOOP PRINCIPAL
 setInterval(() => {
     if (!isAlive || isBossFight) return;
@@ -135,7 +182,14 @@ setInterval(() => {
     const gRect = pipeGround.getBoundingClientRect();
     const cRect = pipeCeiling.getBoundingClientRect();
 
-    // CHÃO
+    // velocidade progressiva
+    score++;
+    gameSpeed = 1 + Math.floor(score / 100) * 0.15;
+
+    pipeGround.style.animationDuration = (2 / gameSpeed) + 's';
+    pipeCeiling.style.animationDuration = (2 / gameSpeed) + 's';
+
+    // chão
     if (
         pipeGround.classList.contains('pipe-animation') &&
         mRect.right > gRect.left + 10 &&
@@ -145,7 +199,7 @@ setInterval(() => {
         finishGame("Cano!");
     }
 
-    // 🔥 TETO CORRIGIDO (SEM BUG)
+    // teto corrigido
     if (
         pipeCeiling.classList.contains('pipe-animation') &&
         mRect.right > cRect.left + 10 &&
@@ -157,7 +211,6 @@ setInterval(() => {
         finishGame("Teto!");
     }
 
-    score++;
     scoreElement.innerHTML = `Pontos: ${Math.floor(score / 10)}`;
 
     if (Math.floor(score / 10) >= 400) startBossFight();
@@ -210,7 +263,6 @@ const bindMobile = (id, down, up = null) => {
 
     btn.addEventListener('touchstart', (e) => {
         e.preventDefault();
-
         down();
 
         if (id === 'btn-left' || id === 'btn-right') {
