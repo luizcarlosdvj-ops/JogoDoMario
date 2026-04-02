@@ -164,3 +164,7 @@ body, html {
     grid-template-columns: repeat(3, 1fr);
     gap: 5px;
 }
+.boss-bullet {
+    background: red;
+    box-shadow: 0 0 10px red;
+}
