@@ -34,6 +34,13 @@
                 <p id="death-reason"></p>
                 <button onclick="restartGame()">RESTART</button>
             </div>
+
+            <div class="game-over-screen" id="victoryScreen" style="background: rgba(46, 204, 113, 0.9); border: 5px solid #fff;">
+                <h1>VITÓRIA!</h1>
+                <p>Você derrotou o Chefão!</p>
+                <h2 id="final-score"></h2>
+                <button onclick="restartGame()">JOGAR NOVAMENTE</button>
+            </div>
         </div>
 
         <div class="mobile-controls">
@@ -48,12 +55,7 @@
             </div>
         </div>
     </div>
-    <div class="game-over-screen" id="victoryScreen" style="background: rgba(46, 204, 113, 0.9);">
-    <h1>VITÓRIA!</h1>
-    <p>Você derrotou o Chefão e salvou o dia!</p>
-    <h2 id="final-score"></h2>
-    <button onclick="restartGame()">JOGAR NOVAMENTE</button>
-</div>
+
     <script src="script.js" defer></script>
 </body>
 </html>
