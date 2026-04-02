@@ -77,20 +77,30 @@ body, html {
 }
 
 @media (max-width: 900px) {
-    .mobile-controls { display: flex; }
-    .pipe-ceiling { height: 85vh; } 
-    /* Ajuste de visão mobile */
-    .mario { bottom: 2vh; width: 14vh; height: 14vh; }
-    .info-panel { top: 1vh; font-size: 14px; }
-}
+    .mobile-controls { 
+        display: flex; 
+        /* Usa 'safe-area-inset' para fugir da barra de navegação/gestos */
+        bottom: calc(5vh + env(safe-area-inset-bottom)); 
+        padding: 0 8vw;
+    }
+    
+    .pipe-ceiling { height: 80vh; } 
+    
+    .mario { 
+        bottom: 4vh; /* Sobe o Mario um pouco mais para fugir da barra */
+        width: 13vh; 
+        height: 13vh; 
+    }
 
-.d-pad, .action-buttons { pointer-events: auto; }
-.d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
-.action-buttons { display: flex; gap: 10px; }
+    /* Botões menores e mais centralizados */
+    .mobile-controls button {
+        width: 10vh; 
+        height: 10vh; 
+        font-size: 12px;
+        background: rgba(255, 255, 255, 0.15); /* Ainda mais transparente */
+        border: 1px solid rgba(255,255,255,0.2);
+    }
 
-.mobile-controls button {
-    width: 12vh; height: 12vh; 
-    background: rgba(255, 255, 255, 0.2); /* Mais transparente para ver o jogo */
-    border: 2px solid rgba(255,255,255,0.3); 
-    border-radius: 50%; color: white; font-size: 10px;
+    .d-pad { gap: 10px; }
+    .action-buttons { gap: 15px; }
 }
