@@ -19,7 +19,7 @@ body, html {
 
 .game-board {
     width: 100vw; height: 100vh;
-    border-bottom: 4vh solid #2ecc71; /* Chão proporcional à altura */
+    border-bottom: 8vh solid #2ecc71; /* Chão mais grosso para visibilidade */
     position: relative; overflow: hidden; 
     background: linear-gradient(#87CEEB, #E0F6FF);
 }
@@ -31,7 +31,7 @@ body, html {
 }
 
 .mario { 
-    width: 12vh; height: 12vh; /* Tamanho baseado na altura da tela */
+    width: 12vh; height: 12vh; 
     position: absolute; bottom: 0; left: 10vw;
     z-index: 10;
 }
@@ -39,10 +39,9 @@ body, html {
 .mario.crouch { height: 6vh !important; }
 
 .pipe { position: absolute; bottom: 0; width: 10vh; height: 25vh; right: -20vh; }
-
 .pipe-ceiling { 
     position: absolute; top: 0; width: 10vh; 
-    height: 90vh; /* Altura fixa para PC/Padrão */
+    height: 90vh; 
     right: -20vh; transform: rotate(180deg); 
 }
 
@@ -70,7 +69,7 @@ body, html {
     padding: 5vh; text-align: center; z-index: 100; border-radius: 15px;
 }
 
-/* CONTROLES MOBILE - Ajustados para não tampar o jogo */
+/* CONTROLES MOBILE */
 .mobile-controls {
     display: none; position: fixed; bottom: 2vh; width: 100%;
     justify-content: space-between; padding: 0 5vw; z-index: 1000;
@@ -79,8 +78,10 @@ body, html {
 
 @media (max-width: 900px) {
     .mobile-controls { display: flex; }
-    /* No celular deitado, o cano do teto desce mais para obrigar o agachar */
     .pipe-ceiling { height: 85vh; } 
+    /* Ajuste de visão mobile */
+    .mario { bottom: 2vh; width: 14vh; height: 14vh; }
+    .info-panel { top: 1vh; font-size: 14px; }
 }
 
 .d-pad, .action-buttons { pointer-events: auto; }
@@ -89,11 +90,7 @@ body, html {
 
 .mobile-controls button {
     width: 12vh; height: 12vh; 
-    background: rgba(0, 0, 0, 0.3); border: 2px solid rgba(255,255,255,0.5); 
+    background: rgba(255, 255, 255, 0.2); /* Mais transparente para ver o jogo */
+    border: 2px solid rgba(255,255,255,0.3); 
     border-radius: 50%; color: white; font-size: 10px;
-}
-#victoryScreen {
-    display: none;
-    border: 5px solid #fff;
-    box-shadow: 0 0 20px #2ecc71;
 }
