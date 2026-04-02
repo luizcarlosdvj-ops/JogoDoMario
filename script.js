@@ -22,6 +22,9 @@ let marioDirection = 1;
 let isCrouching = false;
 let gameSpeed = 1;
 
+// 🔥 NOVO (controle do boss)
+let bossAttackInterval = null;
+
 function applyPhysics() {
     if (!isAlive) return;
 
@@ -84,10 +87,12 @@ function startBossFight() {
     boss.style.display = 'block';
     healthBar.style.display = 'block';
 
-    // Boss começa a atirar
-    setInterval(() => {
-        spawnBossShot();
-    }, 1200);
+    // 🔥 FIX MOBILE (interval controlado)
+    if (!bossAttackInterval) {
+        bossAttackInterval = setInterval(() => {
+            spawnBossShot();
+        }, 1200);
+    }
 }
 
 function marioShoot() {
@@ -149,7 +154,7 @@ function spawnBossShot() {
     document.getElementById('bullets-container').appendChild(bullet);
 
     const moveShot = setInterval(() => {
-        let bLeft = parseInt(bullet.style.left);
+        let bLeft = parseFloat(bullet.style.left); // 🔥 FIX MOBILE
         bullet.style.left = (bLeft - (8 * gameSpeed)) + 'px';
 
         const bRect = bullet.getBoundingClientRect();
@@ -182,14 +187,12 @@ setInterval(() => {
     const gRect = pipeGround.getBoundingClientRect();
     const cRect = pipeCeiling.getBoundingClientRect();
 
-    // velocidade progressiva
     score++;
     gameSpeed = 1 + Math.floor(score / 100) * 0.15;
 
     pipeGround.style.animationDuration = (2 / gameSpeed) + 's';
     pipeCeiling.style.animationDuration = (2 / gameSpeed) + 's';
 
-    // chão
     if (
         pipeGround.classList.contains('pipe-animation') &&
         mRect.right > gRect.left + 10 &&
@@ -199,7 +202,6 @@ setInterval(() => {
         finishGame("Cano!");
     }
 
-    // teto corrigido
     if (
         pipeCeiling.classList.contains('pipe-animation') &&
         mRect.right > cRect.left + 10 &&
@@ -234,6 +236,12 @@ setInterval(() => {
 
 function finishGame(r) {
     isAlive = false;
+
+    // 🔥 limpa ataque do boss
+    if (bossAttackInterval) {
+        clearInterval(bossAttackInterval);
+    }
+
     gameOverScreen.style.display = 'block';
     document.getElementById('death-reason').innerText = r;
 }
