@@ -33,8 +33,8 @@ function applyPhysics() {
     marioVelY -= gravity;
     marioPosY += marioVelY;
 
-    // Ajuste de altura do chão para mobile
-    const floorLimit = window.innerWidth < 900 ? 15 : 0;
+    // Ajustado para 25 para alinhar com o novo 'bottom: 4vh' do CSS no mobile
+    const floorLimit = window.innerWidth < 900 ? 25 : 0;
 
     if (marioPosY <= floorLimit) {
         marioPosY = floorLimit;
